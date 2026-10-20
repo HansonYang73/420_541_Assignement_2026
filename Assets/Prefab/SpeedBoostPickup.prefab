@@ -165,8 +165,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15639760d13eb65408a3c8f0eb423a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  duration: 10
-  respawDelay: 5
+  duration: 5
+  respawnDelay: 30
   visuals: {fileID: 7589032821453023964}
   pickupSound: {fileID: 8300000, guid: 29b895f23fc2f5b4390a05c2955104f7, type: 3}
   pickupEffect: {fileID: 1722953824274378591, guid: 055027ba1cacb2d4ea08971801c26181, type: 3}

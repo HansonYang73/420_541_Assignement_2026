@@ -3,7 +3,6 @@ using UnityEngine.SceneManagement;
 // When the player enters it, save the score and load the End scene.
 public class LevelEndTrigger : MonoBehaviour
 {
-    [SerializeField] private string endSceneName = "EndScene";
  
     private void OnTriggerEnter(Collider other)
     {
@@ -14,6 +13,6 @@ public class LevelEndTrigger : MonoBehaviour
         // to be destroyed together with the rest of SampleScene
         ScoreManager.Instance.SaveFinalScore();
  
-        SceneManager.LoadScene(endSceneName);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }

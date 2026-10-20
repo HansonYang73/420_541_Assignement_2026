@@ -26,11 +26,11 @@ public class PlayerAnimatorController : MonoBehaviour
         bool grounded = movement.IsGrounded;
         animator.SetBool("IsGrounded", grounded);
  
-        // When Fire1 (left mouse button / left Ctrl) is released, roll
-        if (Input.GetButtonUp("Fire1"))
-        {
-            animator.SetTrigger("doRoll");
-        }
+        // // When Fire1 (left mouse button / left Ctrl) is released, roll
+        // if (Input.GetButtonUp("Fire1"))
+        // {
+        //     animator.SetTrigger("doRoll");
+        // }
  
         if (grounded)
         {

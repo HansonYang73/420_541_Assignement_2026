@@ -13,7 +13,7 @@ public class ScoreManager : MonoBehaviour
         // "static" means this value belongs to the ScoreManager CLASS,
     // not to one ScoreManager object. Objects are destroyed when a
     // new scene loads, but static values stay in memory.
-    public static int FinalScore { get; private set; }
+    public static int FinalScore { get; private set; } = 0;
  
     // Called just before we leave the level
     public void SaveFinalScore()
@@ -21,9 +21,14 @@ public class ScoreManager : MonoBehaviour
         FinalScore = Score;
     }
 
+    public void ResetFinalScore()
+    {
+        FinalScore = 0;
+    }
+
 
     // Anyone can read the score, only ScoreManager can change it
-    public int Score { get; private set; }
+    public int Score { get; private set; } = ScoreManager.FinalScore;
 
 
     // Awake runs before any Start(), so Instance is ready before coins need it

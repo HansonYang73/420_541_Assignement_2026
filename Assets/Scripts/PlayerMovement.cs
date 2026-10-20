@@ -1,4 +1,8 @@
+using System;
+using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Android;
+using UnityEngine.SceneManagement;
 
 // Moves the player with a Rigidbody: 
 // A/D or Left/Right arrows to ROTATE, W/S or Up/Down to move Forward/Backward, Space to jump.
@@ -13,6 +17,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Ground Check Settings")]
     [SerializeField] private float groundDistance = 0.5f; // ray length
     [SerializeField] private LayerMask groundMask;        // ground layers
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip jumpAudio;      // units per second
 
     private Rigidbody rb;               // the physics body we move
     private Vector3 moveDirection;      // worked out from input in Update()
@@ -21,10 +27,14 @@ public class PlayerMovement : MonoBehaviour
     private bool jumpRequested = false; // set in Update(), used later
     private bool doubleJumpRequested = false; // set in TryDoubleJump()
     private bool hasDoubleJumped = false;     // one per jump
+    private bool isSprinting = false;
+    private float jumpHoldTime = 0f;
 
     public bool IsGrounded => isGrounded;
 
     public float SpeedMultiplier { get; set; } = 1f;
+    public bool CanDoubleJump { get; set; } = false; // Double Jump boost active or not
+
 
     private void Start()
     {
@@ -34,6 +44,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        CheckInVoid();
         // 1. Ground Check
         isGrounded = Physics.Raycast(transform.position + transform.up*groundDistance/2, -transform.up, groundDistance, groundMask);
 
@@ -42,6 +53,9 @@ public class PlayerMovement : MonoBehaviour
         {
             hasDoubleJumped = false;
         }
+
+        // Check if sprinting
+        isSprinting = Input.GetButton("Run");
 
 
         // 2. Read Inputs
@@ -69,8 +83,13 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // 3. Handle Jump Input
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButton("Jump") && isGrounded)
         {
+            jumpHoldTime += Time.deltaTime;
+        }
+        if ((Input.GetButtonUp("Jump") && isGrounded) || jumpHoldTime >= 3f)
+        {
+            jumpHoldTime = Math.Min(3f, jumpHoldTime);
             jumpRequested = true;
         }
     }
@@ -81,14 +100,16 @@ public class PlayerMovement : MonoBehaviour
  
         if (jumpRequested)
         {
-            Jump(jumpForce);
+            Jump(jumpForce + jumpHoldTime);
             jumpRequested = false;
+            jumpHoldTime = 0f;
         }
  
         // NEW: the second jump, in mid-air
         if (doubleJumpRequested)
         {
             Jump(doubleJumpForce);
+            GetComponent<AudioSource>().PlayOneShot(jumpAudio);
             doubleJumpRequested = false;
         }
     }
@@ -105,6 +126,10 @@ public class PlayerMovement : MonoBehaviour
     {
         // Calculate velocity based on current forward vector
         Vector3 targetVelocity = moveDirection * moveSpeed * SpeedMultiplier;
+        if (isSprinting)
+        {
+            targetVelocity *= 2;
+        }
 
         // Apply movement while preserving vertical velocity (gravity/jumping)
         rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
@@ -115,11 +140,24 @@ public class PlayerMovement : MonoBehaviour
     public bool TryDoubleJump()
     {
         // Not allowed on the ground, or if it was already used
-        if (isGrounded || hasDoubleJumped) return false;
+        if (isGrounded || hasDoubleJumped || !CanDoubleJump) return false;
  
         doubleJumpRequested = true;
         hasDoubleJumped = true;
         return true;
+    }
+
+    private void CheckInVoid()
+    {
+        if (transform.position.y < -15f)
+        {
+            RestartScene();
+        }
+    }
+
+    void RestartScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }
